@@ -7,50 +7,51 @@ const GROUP_PR_TITLE = 'ogbot PR title';
 const JIRA_PATTERN = /^([A-Z]+-\d+): .*$/;
 
 async function run() {
-    try {
-		// get basic info
-        const eventName = github.context.eventName;
-        core.info(`Event name: ${eventName}`);
-        if (validEvent.indexOf(eventName) < 0) {
-            core.setFailed(`Invalid event: ${eventName}`);
-            return;
-        }
-        const authToken = core.getInput('token', {required: true})
-        const client = new github.GitHub(authToken);
-        const owner = github.context.payload.pull_request.base.user.login;
-        const repo = github.context.payload.pull_request.base.repo.name;
-
-		// ensure pull request info is up to date
-        const {data: pr} = await client.pulls.get({
-          owner,
-          repo,
-          pull_number: github.context.payload.pull_request.number
-        });
-        const prUser = pr.user.login;
-        const prTitle = pr.title;
-        core.info(`Pull Request ${owner}/${repo}/${pr.number} has title: "${prTitle}"`);
-
-        // validate
-        if (isDependabot(prUser) || isOgbot(prUser)) {
-          core.info("JIRA: PR is from dependabot/ogbot");
-		  updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "No need to check JIRA format - PR is from dependabot/ogbot");
-        } else if (prTitle.indexOf('WIP')>= 0) {
-          core.info("JIRA: Branch is WIP");
-		  updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "pending", "Work In Progress - change PR title to enable merging");
-        } else if (prTitle.startsWith('TASK: ')) {
-          core.info("JIRA: TASK prefix found");
-		  updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "WARNING! Use of 'TASK' prefix is not currently recommended");
-        } else if (JIRA_PATTERN.test(prTitle)) {
-          core.info("JIRA: Valid JIRA format found");
-		  updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "PR title contains JIRA reference");
-        } else {
-          core.info("JIRA: Invalid title found with no JIRA");
-		  updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "failure", "PR title does not start with JIRA reference, eg. 'PROD-123: '");
-        }
-
-    } catch (error) {
-        core.setFailed(error.message);
+  try {
+    // get basic info
+    const eventName = github.context.eventName;
+    core.info(`Event name: ${eventName}`);
+    if (validEvent.indexOf(eventName) < 0) {
+      core.setFailed(`Invalid event: ${eventName}`);
+      return;
     }
+    const authToken = core.getInput('token', {required: true})
+    const client = new github.GitHub(authToken);
+    const owner = github.context.payload.pull_request.base.user.login;
+    const repo = github.context.payload.pull_request.base.repo.name;
+
+    // ensure pull request info is up to date
+    const {data: pr} = await client.pulls.get({
+      owner,
+      repo,
+      pull_number: github.context.payload.pull_request.number
+    });
+    const prUser = pr.user.login;
+    const prTitle = pr.title;
+    core.info(`Pull Request ${owner}/${repo}/${pr.number} has title: "${prTitle}"`);
+
+    // validate
+    if (isDependabot(prUser) || isOgbot(prUser)) {
+      core.info("JIRA: PR is from dependabot/ogbot");
+      updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "No need to check JIRA format - PR is from dependabot/ogbot");
+    } else if (prTitle.indexOf('WIP')>= 0) {
+      core.info("JIRA: Branch is WIP");
+      updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "pending", "Work In Progress - change PR title to enable merging");
+    } else if (prTitle.startsWith('TASK: ')) {
+      core.info("JIRA: TASK prefix found");
+      updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "WARNING! Use of 'TASK' prefix is not currently recommended");
+    } else if (JIRA_PATTERN.test(prTitle)) {
+      core.info("JIRA: Valid JIRA format found");
+      updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "PR title contains JIRA reference");
+      updateJiraComment(client, owner, repo, pr);
+    } else {
+      core.info("JIRA: Invalid title found with no JIRA");
+      updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "failure", "PR title does not start with JIRA reference, eg. 'PROD-123: '");
+    }
+
+  } catch (error) {
+    core.setFailed(error.message);
+  }
 }
 
 run();
@@ -67,7 +68,6 @@ async function updateStatus(client, owner, repo, pr, group, state, msg) {
     ref: pr.head.sha
   });
   
-//  const current = (await github.repos.listStatusesForRef(context.repo({ref: pr.head.sha}))).data;
   const matched = current.find(status => status.context === group);
   if (matched && matched.state === state && matched.description === msg) {
     core.info("No need to update status on GitHub");
@@ -86,12 +86,35 @@ async function updateStatus(client, owner, repo, pr, group, state, msg) {
 }
 
 //------------------------------------------------------
+// check if the JIRA link has been added, and if not add it
+async function updateJiraComment(client, owner, repo, pr) {
+  core.info("Finding if JIRA already present")
+  const currentBody = pr.body == null ? "" : pr.body;
+  const jira = pr.title.match(JIRA_PATTERN)[1];
+  if (jira) {
+    // only update the PR if the link is not present
+    const jiraLink = "https://opengamma.atlassian.net/browse/" + jira;
+    if (currentBody.indexOf(jiraLink) < 0) {
+      core.info("Adding JIRA link: %s", jiraLink);
+      const newBody = currentBody + '\n\n![og-bot](https://avatars2.githubusercontent.com/in/26131?s=20&v=4 "og-bot") See [JIRA issue](' + jiraLink + ').';
+      // update the PR body
+      return client.pulls.update({
+        owner,
+        repo,
+		pull_number: pr.number,
+		body: newBody
+	  });
+    }
+  }
+}
+
+//------------------------------------------------------
 function isDependabot(user) {
   return user === 'dependabot[bot]' || user === 'dependabot-preview[bot]';
 }
 
 //------------------------------------------------------
 function isOgbot(user) {
-  return user === 'opengammacibot';
+  return user === 'github-actions' || user === 'github-actions[bot]' || user === 'opengammacibot';
 }
 
