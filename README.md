@@ -1,0 +1,2 @@
+# OGBot
+Robot for OpenGamma
