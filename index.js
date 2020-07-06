@@ -30,23 +30,36 @@ async function run() {
     const prTitle = pr.title;
     core.info(`Pull Request ${owner}/${repo}/${pr.number} has title: "${prTitle}"`);
 
-    // validate
+    // validate PR title
     if (isDependabot(prUser) || isOgbot(prUser)) {
-      core.info("JIRA: PR is from dependabot/ogbot");
+      core.info("PR is from dependabot/ogbot");
       updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "No need to check JIRA format - PR is from dependabot/ogbot");
     } else if (prTitle.indexOf('WIP')>= 0) {
-      core.info("JIRA: Branch is WIP");
+      core.info("Branch is WIP");
       updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "pending", "Work In Progress - change PR title to enable merging");
     } else if (prTitle.startsWith('TASK: ')) {
-      core.info("JIRA: TASK prefix found");
+      core.info("TASK prefix found");
       updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "WARNING! Use of 'TASK' prefix is not currently recommended");
     } else if (JIRA_PATTERN.test(prTitle)) {
-      core.info("JIRA: Valid JIRA format found");
+      core.info("Valid JIRA format found");
       updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "PR title contains JIRA reference");
+	  // add JIRA link
       updateJiraComment(client, owner, repo, pr);
     } else {
-      core.info("JIRA: Invalid title found with no JIRA");
+      core.info("Invalid title found with no JIRA");
       updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "failure", "PR title does not start with JIRA reference, eg. 'PROD-123: '");
+    }
+
+    // approve PR raised by bot
+    if (isDependabot(prUser) || isOgbot(prUser)) {
+      core.info("Approving PR raised by ogbot/dependabot");
+      const approveParams = context.issue({event: 'APPROVE'});
+      return client.pulls.createReview({
+        owner,
+        repo,
+		pull_number: pr.number,
+		event: 'APPROVE'
+	  });
     }
 
   } catch (error) {
@@ -67,14 +80,13 @@ async function updateStatus(client, owner, repo, pr, group, state, msg) {
     repo,
     ref: pr.head.sha
   });
-  
   const matched = current.find(status => status.context === group);
   if (matched && matched.state === state && matched.description === msg) {
-    core.info("No need to update status on GitHub");
+    core.info("No need to update status");
     return;
   }
   // update the status
-  core.info("Update status on GitHub to " + state);
+  core.info("Updating status to " + state);
   return client.repos.createStatus({
     owner,
     repo,
@@ -95,7 +107,7 @@ async function updateJiraComment(client, owner, repo, pr) {
     // only update the PR if the link is not present
     const jiraLink = "https://opengamma.atlassian.net/browse/" + jira;
     if (currentBody.indexOf(jiraLink) < 0) {
-      core.info("Adding JIRA link: %s", jiraLink);
+      core.info(`"Adding JIRA link: ${jiraLink}`);
       const newBody = currentBody + '\n\n![og-bot](https://avatars2.githubusercontent.com/in/26131?s=20&v=4 "og-bot") See [JIRA issue](' + jiraLink + ').';
       // update the PR body
       return client.pulls.update({
