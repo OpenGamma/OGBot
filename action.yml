@@ -1,0 +1,14 @@
+name: 'ogbot-pr'
+description: 'Process PR for OpenGamma'
+author: 'jodastephen'
+inputs:
+  token:
+    description: 'The Personal access token (PAT)'
+    default: ${{ github.token }}
+
+runs:
+  using: 'node12'
+  main: 'index.js'
+branding:
+  icon: 'alert-triangle'
+  color: 'gray-dark'
