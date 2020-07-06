@@ -1,5 +1,5 @@
-name: 'ogbot-pr'
-description: 'Process PR for OpenGamma'
+name: 'ogbot'
+description: 'Robot for OpenGamma'
 author: 'jodastephen'
 inputs:
   token:
