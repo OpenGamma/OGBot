@@ -53,7 +53,6 @@ async function run() {
     // approve PR raised by bot
     if (isDependabot(prUser) || isOgbot(prUser)) {
       core.info("Approving PR raised by ogbot/dependabot");
-      const approveParams = context.issue({event: 'APPROVE'});
       return client.pulls.createReview({
         owner,
         repo,
