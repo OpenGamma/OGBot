@@ -31,24 +31,25 @@ async function run() {
     core.info(`Pull Request ${owner}/${repo}/${pr.number} has title: "${prTitle}"`);
 
     // validate PR title
-    if (isDependabot(prUser) || isOgbot(prUser)) {
-      core.info("PR is from dependabot/ogbot");
-      updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "No need to check JIRA format - PR is from dependabot/ogbot");
-    } else if (prTitle.indexOf('WIP')>= 0) {
-      core.info("Branch is WIP");
-      updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "pending", "Work In Progress - change PR title to enable merging");
-    } else if (prTitle.startsWith('TASK: ')) {
-      core.info("TASK prefix found");
-      updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "WARNING! Use of 'TASK' prefix is not currently recommended");
-    } else if (JIRA_PATTERN.test(prTitle)) {
-      core.info("Valid JIRA format found");
-      updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "PR title contains JIRA reference");
-	  // add JIRA link
-      updateJiraComment(client, owner, repo, pr);
-    } else {
-      core.info("Invalid title found with no JIRA");
-      updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "failure", "PR title does not start with JIRA reference, eg. 'PROD-123: '");
-    }
+    updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "failure", "Repo closed");
+//     if (isDependabot(prUser) || isOgbot(prUser)) {
+//       core.info("PR is from dependabot/ogbot");
+//       updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "No need to check JIRA format - PR is from dependabot/ogbot");
+//     } else if (prTitle.indexOf('WIP')>= 0) {
+//       core.info("Branch is WIP");
+//       updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "pending", "Work In Progress - change PR title to enable merging");
+//     } else if (prTitle.startsWith('TASK: ')) {
+//       core.info("TASK prefix found");
+//       updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "WARNING! Use of 'TASK' prefix is not currently recommended");
+//     } else if (JIRA_PATTERN.test(prTitle)) {
+//       core.info("Valid JIRA format found");
+//       updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "PR title contains JIRA reference");
+// 	  // add JIRA link
+//       updateJiraComment(client, owner, repo, pr);
+//     } else {
+//       core.info("Invalid title found with no JIRA");
+//       updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "failure", "PR title does not start with JIRA reference, eg. 'PROD-123: '");
+//     }
 
     // approve PR raised by bot
     if (isDependabot(prUser) || isOgbot(prUser)) {
