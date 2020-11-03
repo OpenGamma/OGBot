@@ -30,18 +30,12 @@ async function run() {
     const prUser = pr.user.login;
     const prTitle = pr.title;
     core.info(`Pull Request ${owner}/${repo}/${pr.number} has title: "${prTitle}"`);
-    core.info(`Pull Request ${owner}/${repo} is private: "${prRepo.private}"`);
-    core.info(`1 `);
-    dumpObjectKeys(github.context.payload.pull_request)
-    core.info(`2 `);
-    dumpObjectKeys(prRepo)
-    core.info(`3 `);
 
     // validate PR title
-    if (prRepo.private == "false") {
-      updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "Public repo");
-    } else {
+    if (prRepo.private) {
       updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "failure", "Repo closed");
+    } else {
+      updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "Public repo");
     }
 //     if (isDependabot(prUser) || isOgbot(prUser)) {
 //       core.info("PR is from dependabot/ogbot");
