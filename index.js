@@ -26,19 +26,19 @@ async function run() {
       repo,
       pull_number: github.context.payload.pull_request.number
     });
-    const repoPrivate = repo.private;
+    const prRepo = github.context.payload.pull_request.base.repo;
     const prUser = pr.user.login;
     const prTitle = pr.title;
     core.info(`Pull Request ${owner}/${repo}/${pr.number} has title: "${prTitle}"`);
-    core.info(`Pull Request ${owner}/${repo} is private: "${repoPrivate}"`);
+    core.info(`Pull Request ${owner}/${repo} is private: "${prRepo.private}"`);
     core.info(`1 `);
     dumpObjectKeys(github.context.payload.pull_request)
     core.info(`2 `);
-    dumpObjectKeys(repo)
+    dumpObjectKeys(prRepo)
     core.info(`3 `);
 
     // validate PR title
-    if (repoPrivate == "false") {
+    if (prRepo.private == "false") {
       updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "Public repo");
     } else {
       updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "failure", "Repo closed");
