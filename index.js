@@ -30,12 +30,13 @@ async function run() {
     const prUser = pr.user.login;
     const prTitle = pr.title;
     core.info(`Pull Request ${owner}/${repo}/${pr.number} has title: "${prTitle}"`);
+    core.info(`Pull Request ${owner}/${repo} is private: "${repoPrivate}"`);
 
     // validate PR title
-    if (repoPrivate) {
-      updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "failure", "Repo closed");
-    } else {
+    if (repoPrivate == "false") {
       updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "Public repo");
+    } else {
+      updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "failure", "Repo closed");
     }
 //     if (isDependabot(prUser) || isOgbot(prUser)) {
 //       core.info("PR is from dependabot/ogbot");
