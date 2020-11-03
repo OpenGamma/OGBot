@@ -57,9 +57,9 @@ async function run() {
       return client.pulls.createReview({
         owner,
         repo,
-		pull_number: pr.number,
-		event: 'APPROVE'
-	  });
+        pull_number: pr.number,
+        event: 'APPROVE'
+      });
     }
 
   } catch (error) {
@@ -113,9 +113,9 @@ async function updateJiraComment(client, owner, repo, pr) {
       return client.pulls.update({
         owner,
         repo,
-		pull_number: pr.number,
-		body: newBody
-	  });
+        pull_number: pr.number,
+        body: newBody
+      });
     }
   }
 }
