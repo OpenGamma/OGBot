@@ -35,7 +35,11 @@ async function run() {
     if (prRepo.private) {
       updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "failure", "Repo closed");
     } else {
-      updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "Public repo");
+      if (JIRA_PATTERN.test(prTitle)) {
+        updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "failure", "Public repo must not refer to JIRA");
+      } else {
+        updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "Public repo");
+      }
     }
 //     if (isDependabot(prUser) || isOgbot(prUser)) {
 //       core.info("PR is from dependabot/ogbot");
