@@ -26,12 +26,17 @@ async function run() {
       repo,
       pull_number: github.context.payload.pull_request.number
     });
+    const repoPrivate = repo.private;
     const prUser = pr.user.login;
     const prTitle = pr.title;
     core.info(`Pull Request ${owner}/${repo}/${pr.number} has title: "${prTitle}"`);
 
     // validate PR title
-    updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "failure", "Repo closed");
+    if (repoPrivate) {
+      updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "failure", "Repo closed");
+    } else {
+      updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "Public repo");
+    }
 //     if (isDependabot(prUser) || isOgbot(prUser)) {
 //       core.info("PR is from dependabot/ogbot");
 //       updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "No need to check JIRA format - PR is from dependabot/ogbot");
