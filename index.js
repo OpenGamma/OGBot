@@ -31,6 +31,11 @@ async function run() {
     const prTitle = pr.title;
     core.info(`Pull Request ${owner}/${repo}/${pr.number} has title: "${prTitle}"`);
     core.info(`Pull Request ${owner}/${repo} is private: "${repoPrivate}"`);
+    core.info(`1 `);
+    dumpObjectKeys(github.context.payload.pull_request)
+    core.info(`2 `);
+    dumpObjectKeys(repo)
+    core.info(`3 `);
 
     // validate PR title
     if (repoPrivate == "false") {
@@ -134,5 +139,23 @@ function isDependabot(user) {
 //------------------------------------------------------
 function isOgbot(user) {
   return user === 'github-actions' || user === 'github-actions[bot]' || user === 'opengammacibot';
+}
+
+//------------------------------------------------------
+// debug contents of an object
+function dumpObjectKeys(obj) {
+  var keys = Object.getOwnPropertyNames(obj);
+  core.info("Keys %s", keys);
+}
+
+// debug methods of an object (this sometimes results in an error)
+function dumpMethods(obj) {
+  let properties = new Set()
+  let currentObj = obj
+  do {
+    Object.getOwnPropertyNames(currentObj).map(item => properties.add(item))
+  } while ((currentObj = Object.getPrototypeOf(currentObj)))
+  let methods = [...properties.keys()].filter(item => typeof obj[item] === 'function')
+  core.info("Methods %s", methods);
 }
 
