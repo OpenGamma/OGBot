@@ -145,7 +145,7 @@ function isOgbot(user) {
 // debug contents of an object
 function dumpObjectKeys(obj) {
   var keys = Object.getOwnPropertyNames(obj);
-  core.info("Keys %s", keys);
+  core.info(`Keys ${keys}`);
 }
 
 // debug methods of an object (this sometimes results in an error)
@@ -156,6 +156,6 @@ function dumpMethods(obj) {
     Object.getOwnPropertyNames(currentObj).map(item => properties.add(item))
   } while ((currentObj = Object.getPrototypeOf(currentObj)))
   let methods = [...properties.keys()].filter(item => typeof obj[item] === 'function')
-  core.info("Methods %s", methods);
+  core.info(`Methods ${methods}`);
 }
 
