@@ -29,7 +29,7 @@ async function run() {
     const prRepo = github.context.payload.pull_request.base.repo;
     const prUser = pr.user.login;
     const prTitle = pr.title;
-    core.info(`Pull Request ${owner}/${repo}/${pr.number} has title: "${prTitle}"`);
+    core.info(`Pull Request ${owner}/${repo}/${pr.number} by ${prUser} has title: "${prTitle}"`);
 
     // validate PR title
     if (prRepo.private) {
