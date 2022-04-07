@@ -44,7 +44,7 @@ async function run() {
         updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "pending", "Work In Progress - change PR title to enable merging");
       } else if (prTitle.startsWith('TASK: ')) {
         core.info("TASK prefix found");
-        updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "WARNING! Use of 'TASK' prefix is not currently recommended");
+        updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "failure", "PR title does not contain a valid JIRA reference");
       } else if (JIRA_PATTERN.test(prTitle)) {
         core.info("Valid JIRA format found");
         updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "success", "PR title contains JIRA reference");
