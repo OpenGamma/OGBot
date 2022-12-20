@@ -27,15 +27,18 @@ async function run() {
       pull_number: github.context.payload.pull_request.number
     });
     const prRepo = github.context.payload.pull_request.base.repo;
+    const prBranch = github.context.payload.pull_request.base.ref;
     const prUser = pr.user.login;
     const prTitle = pr.title;
-    core.info(`Pull Request ${owner}/${repo}/${pr.number} by ${prUser} has title: "${prTitle}"`);
+    core.info(`Pull Request ${owner}/${repo}/${pr.number} on ${prBranch} by ${prUser} has title: "${prTitle}"`);
 
     // validate PR title
     if (prRepo.private) {
-      // implement a code freeze by uncommentig these two lines
-      updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "failure", "Repo closed");
-      return;
+      // implement a code freeze by uncommentig these four lines
+      if (prRef == 'main') {
+        updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "failure", "Repo closed");
+        return;
+      }
       // normal rules outside a code freeze
       if (isDependabot(prUser) || isOgbot(prUser)) {
         core.info("PR is from dependabot/ogbot");
