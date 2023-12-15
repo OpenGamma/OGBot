@@ -35,10 +35,10 @@ async function run() {
     // validate PR title
     if (prRepo.private) {
       // implement a code freeze by uncommentig these four lines
-      //if (prBranch == 'main') {
-        //updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "failure", "Repo closed");
-        //return;
-      //}
+      if (prBranch == 'main') {
+        updateStatus(client, owner, repo, pr, GROUP_PR_TITLE, "failure", "Repo closed");
+        return;
+      }
       // normal rules outside a code freeze
       if (isDependabot(prUser) || isOgbot(prUser)) {
         core.info("PR is from dependabot/ogbot");
