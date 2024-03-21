@@ -66,9 +66,11 @@ async function run() {
       }
     }
 
-    // approve PR raised by bot
-    if (isDependabot(prUser) || isOgbot(prUser)) {
-      core.info("Approving PR raised by ogbot/dependabot");
+    // Approve PR if both the PR itself and its latest commit
+    // were raised by a bot.
+    const mostRecentCommitAuthor = pr.head.user.login
+    if ([prUser, mostRecentCommitAuthor].every(login => isDependabot(login) || isOgbot(login))) {
+      core.info("Approving PR and commit raised by ogbot/dependabot");
       return client.pulls.createReview({
         owner,
         repo,
