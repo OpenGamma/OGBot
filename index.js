@@ -16,7 +16,7 @@ async function run() {
       return;
     }
     const authToken = core.getInput('token', {required: true})
-    const client = github.getOctokit(authToken).rest;
+    const client = new github.GitHub(authToken);
     const owner = github.context.payload.pull_request.base.user.login;
     const repo = github.context.payload.pull_request.base.repo.name;
 
@@ -90,7 +90,7 @@ async function updateStatus(client, owner, repo, pr, group, state, msg) {
   // query the current status and check if we need to make a change
   // this avoids repeatedly updating the status when it hasn't changed
   // (GitHub stores each update immutably as a new status)
-  const {data: current} = await client.repos.listCommitStatusesForRef({
+  const {data: current} = await client.repos.listStatusesForRef({
     owner,
     repo,
     ref: pr.head.sha
@@ -102,7 +102,7 @@ async function updateStatus(client, owner, repo, pr, group, state, msg) {
   }
   // update the status
   core.info("Updating status to " + state);
-  return client.repos.createCommitStatus({
+  return client.repos.createStatus({
     owner,
     repo,
     sha: pr.head.sha,

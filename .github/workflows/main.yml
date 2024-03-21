@@ -4,16 +4,15 @@ on: [pull_request]
 
 jobs:
   build:
-    name: PR check
+    # Job name is Greeting
+    name: Check
     # This job runs on Linux
     runs-on: 'ubuntu-latest'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@v1
         with:
-          node-version: '20.x'      # This step prints an output (time) from the previous step's action.
-      - run: npm ci                 # Clean install. See: https://docs.npmjs.com/cli/v10/commands/npm-ci.
-      - name: Self-Run              # Self-run the action against OGBot PRs as an "integration test".
-        uses: ./
-        with:
-          token: ${{ github.token }}
+          node-version: '10.x'      # This step prints an output (time) from the previous step's action.
+      - run: npm install
+      - name: Validate
+        run: node index.js
