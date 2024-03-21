@@ -92,7 +92,7 @@ async function updateStatus(client, owner, repo, pr, group, state, msg) {
   // query the current status and check if we need to make a change
   // this avoids repeatedly updating the status when it hasn't changed
   // (GitHub stores each update immutably as a new status)
-  const {data: current} = await client.repos.listStatusesForRef({
+  const {data: current} = await client.repos.listCommitStatusesForRef({
     owner,
     repo,
     ref: pr.head.sha
@@ -104,7 +104,7 @@ async function updateStatus(client, owner, repo, pr, group, state, msg) {
   }
   // update the status
   core.info("Updating status to " + state);
-  return client.repos.createStatus({
+  return client.repos.createCommitStatus({
     owner,
     repo,
     sha: pr.head.sha,
