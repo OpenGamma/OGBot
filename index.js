@@ -21,7 +21,7 @@ async function run() {
     const repo = github.context.payload.pull_request.base.repo.name;
 
     // ensure pull request info is up to date
-    const {data: pr} = await client.pulls.get({
+    const {data: pr} = await client.rest.pulls.get({
       owner,
       repo,
       pull_number: github.context.payload.pull_request.number
