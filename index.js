@@ -16,12 +16,12 @@ async function run() {
       return;
     }
     const authToken = core.getInput('token', {required: true})
-    const client = github.getOctokit(authToken);
+    const client = github.getOctokit(authToken).rest;
     const owner = github.context.payload.pull_request.base.user.login;
     const repo = github.context.payload.pull_request.base.repo.name;
 
     // ensure pull request info is up to date
-    const {data: pr} = await client.rest.pulls.get({
+    const {data: pr} = await client.pulls.get({
       owner,
       repo,
       pull_number: github.context.payload.pull_request.number
