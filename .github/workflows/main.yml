@@ -9,6 +9,7 @@ jobs:
     runs-on: 'ubuntu-latest'
     steps:
       - uses: actions/checkout@v4
+      - run: npm ci                 # Clean install. See: https://docs.npmjs.com/cli/v10/commands/npm-ci.
       - name: Self-Run              # Self-run the action against OGBot PRs as an "integration test".
         uses: ./
         with:
