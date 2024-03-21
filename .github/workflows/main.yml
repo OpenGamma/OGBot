@@ -16,5 +16,3 @@ jobs:
       - run: npm ci # Clean install. See: https://docs.npmjs.com/cli/v10/commands/npm-ci
       - name: Validate
         run: node index.js
-        with:
-          token: ${{ github.token }}
