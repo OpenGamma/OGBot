@@ -16,7 +16,7 @@ async function run() {
       return;
     }
     const authToken = core.getInput('token', {required: true})
-    const client = new github.GitHub(authToken);
+    const client = github.getOctokit(authToken);
     const owner = github.context.payload.pull_request.base.user.login;
     const repo = github.context.payload.pull_request.base.repo.name;
 
@@ -66,9 +66,11 @@ async function run() {
       }
     }
 
-    // approve PR raised by bot
-    if (isDependabot(prUser) || isOgbot(prUser)) {
-      core.info("Approving PR raised by ogbot/dependabot");
+    // Approve PR if both the PR itself and its latest commit
+    // were raised by a bot.
+    const mostRecentCommitAuthor = pr.head.user.login
+    if ([prUser, mostRecentCommitAuthor].every(login => isDependabot(login) || isOgbot(login))) {
+      core.info("Approving PR and commit raised by ogbot/dependabot");
       return client.pulls.createReview({
         owner,
         repo,
