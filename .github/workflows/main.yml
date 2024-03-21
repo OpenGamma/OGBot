@@ -17,4 +17,4 @@ jobs:
       - name: Validate
         run: node index.js
         with:
-            token: ${{ github.token }}
+          token: ${{ github.token }}
