@@ -68,15 +68,14 @@ async function run() {
 
     // Approve PR if both the PR itself and its latest commit
     // were raised by a bot.
-    
     const { data: latestCommit } = await client.git.getCommit({
       owner,
       repo,
       commit_sha: pr.head.sha
     });
-
+    // A Git commit does not necessarily have to be associated with a GitHub login,
+    // and so 'login' is not a field we can extract. Bots use the same 'name' as 'login', so we use that instead.
     const mostRecentCommitAuthor = latestCommit.author.name
-    core.info("Name: " + latestCommit.author.name + " login: " + latestCommit.author.login);
     if ([prUser, mostRecentCommitAuthor].every(login => isDependabot(login) || isOgbot(login))) {
       core.info("Approving PR and commit raised by ogbot/dependabot");
       return client.pulls.createReview({
