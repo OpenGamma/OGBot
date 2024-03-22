@@ -76,7 +76,7 @@ async function run() {
     });
 
     const mostRecentCommitAuthor = lastestCommit.author.name
-    core.info("Commit author: " + mostRecentCommitAuthor + " prUser: " + prUser);
+    core.info("Name: " + lastestCommit.author.name + " login: " + lastestCommit.author.login);
     if ([prUser, mostRecentCommitAuthor].every(login => isDependabot(login) || isOgbot(login))) {
       core.info("Approving PR and commit raised by ogbot/dependabot");
       return client.pulls.createReview({
