@@ -69,14 +69,14 @@ async function run() {
     // Approve PR if both the PR itself and its latest commit
     // were raised by a bot.
     
-    const { data: lastestCommit } = client.git.getCommit({
+    const { data: latestCommit } = await client.git.getCommit({
       owner,
       repo,
       commit_sha: pr.head.sha
     });
 
-    const mostRecentCommitAuthor = lastestCommit.author.name
-    core.info("Name: " + lastestCommit.author.name + " login: " + lastestCommit.author.login);
+    const mostRecentCommitAuthor = latestCommit.author.name
+    core.info("Name: " + latestCommit.author.name + " login: " + latestCommit.author.login);
     if ([prUser, mostRecentCommitAuthor].every(login => isDependabot(login) || isOgbot(login))) {
       core.info("Approving PR and commit raised by ogbot/dependabot");
       return client.pulls.createReview({
